@@ -9,6 +9,8 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 final_output_file = None
 config_values = {}
+config_built = False
+
 
 
 import data_cleaner
@@ -307,48 +309,25 @@ def build_config_screen():
     # -------- VLOOKUP CONFIG --------
     if "vlookup" in selected_operations:
         section = tk.LabelFrame(
-            config, text="VLOOKUP Settings",
-            bg="#dbeeff", padx=10, pady=10
+            config,
+            text="VLOOKUP Settings",
+            bg="#dbeeff",
+            padx=10,
+            pady=10
         )
+        section.pack(padx=150, pady=10, fill="x")
 
-    section.pack(padx=150, pady=10, fill="x")
+        lookup_entry = tk.Entry(section, width=30)
+        return_entry = tk.Entry(section, width=30)
 
-    tk.Label(section, text="Lookup Column:", bg="#dbeeff").pack(anchor="w")
-    lookup_col_entry = tk.Entry(section, width=30)
-    lookup_col_entry.pack(anchor="w")
+        tk.Label(section, text="Lookup Column:", bg="#dbeeff").pack(anchor="w")
+        lookup_entry.pack(anchor="w")
 
-    tk.Label(section, text="Return Column:", bg="#dbeeff").pack(anchor="w", pady=(5, 0))
-    return_col_entry = tk.Entry(section, width=30)
-    return_col_entry.pack(anchor="w")
+        tk.Label(section, text="Return Column:", bg="#dbeeff").pack(anchor="w")
+        return_entry.pack(anchor="w")
 
-    # store entries for backend use
-    config_values["lookup_col"] = lookup_col_entry
-    config_values["return_col"] = return_col_entry
-
-
-
-    section.pack(padx=150, pady=10, fill="x")
-
-
-    section.pack(padx=150, pady=10, fill="x")
-
-    tk.Label(section, text="Lookup Column:", bg="#dbeeff").pack(anchor="w")
-    lookup_col_entry = tk.Entry(section, width=30)
-    lookup_col_entry.pack(anchor="w")
-
-    tk.Label(section, text="Return Column:", bg="#dbeeff").pack(anchor="w", pady=(5, 0))
-    return_col_entry = tk.Entry(section, width=30)
-    return_col_entry.pack(anchor="w")
-
-        # store entries for backend use
-
-    config_values["lookup_col"] = lookup_col_entry
-    config_values["return_col"] = return_col_entry
-
-    config_values["lookup_col"] = lookup_col_entry
-    config_values["return_col"] = return_col_entry
-
-
+        config_values["lookup_col"] = lookup_entry
+        config_values["return_col"] = return_entry
 
 
     # -------- NAV BUTTONS --------
@@ -376,6 +355,8 @@ progress_value = tk.IntVar()
 status_text = tk.StringVar()
 
 def start_processing():
+    lookup_col = None
+    return_col = None
     progress_value.set(0)
     status_text.set("Initializing...")
 
@@ -529,46 +510,19 @@ def run_backend():
 
             current_files = [merged_out]
             print("Merging done")
-
+          #-----------VLOOKUP ----------
+        # Requires two files: base file + lookup table
         if "vlookup" in selected_operations:
             status_text.set("Applying VLOOKUP...")
-            lookup_col = config_values["lookup_col"].get()
-            return_col = config_values["return_col"].get()
-
-        if not lookup_col or not return_col:
-            raise ValueError("VLOOKUP requires both lookup and return columns.")
-
-        vlookup_out = os.path.join(OUTPUT_DIR, "vlookup_output.xlsx")
-        #-----------VLOOKUP ----------
-        # Requires two files: base file + lookup table
-        if len(current_files) < 2:
-            raise ValueError("VLOOKUP requires two Excel files.")
-
-        vlookup.vlookup_excel(
-            main_file=current_files[0],
-            lookup_file=current_files[1],
-            output_file=vlookup_out,
-            key_column=lookup_col,
-            lookup_column=return_col
-        )
-
-
-        current_files = [vlookup_out]
-
-        #-----------VLOOKUP ----------
-        # Requires two files: base file + lookup table
-        
-        if "vlookup" in selected_operations:
-            status_text.set("Applying VLOOKUP...")
-
             lookup_col = config_values["lookup_col"].get()
             return_col = config_values["return_col"].get()
 
             if not lookup_col or not return_col:
                 raise ValueError("VLOOKUP requires both lookup and return columns.")
 
-            vlookup_out = os.path.join(OUTPUT_DIR, "vlookup_output.xlsx")
 
+            vlookup_out = os.path.join(OUTPUT_DIR, "vlookup_output.xlsx")
+      
             if len(current_files) < 2:
                 raise ValueError("VLOOKUP requires two Excel files.")
 
@@ -580,9 +534,8 @@ def run_backend():
                 lookup_column=return_col
             )
 
-            current_files = [vlookup_out]
-        
 
+            current_files = [vlookup_out]
 
 
         # ---------- SORT / FILTER ----------
