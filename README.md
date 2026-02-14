@@ -12,13 +12,13 @@ PyXcel Automator was built to simplify repetitive and error-prone Excel tasks. M
 
 - **Excel Automation:** Perform data cleaning, merging, sorting, filtering, and VLOOKUP operations automatically.
 - **Built-in Calculations**:
-     Perform basic statistical calculations (Sum, Average, Count, Min, Max)
-      Column-based computations
-      Automated formula execution
+     - Perform basic statistical calculations (Sum, Average, Count, Min, Max)
+     - Column-based computations
+     - Automated formula execution
 - **Data Visualization:**
-     Generate charts directly from Excel data
-     Create bar charts, line graphs, and pie charts
-     Quick visual insights without manual Excel chart creation
+    - Generate charts directly from Excel data
+    - Create bar charts, line graphs, and pie charts
+    - Quick visual insights without manual Excel chart creation
 - **Dynamic Configuration:** Displays configuration options only for selected operations.
 - **User-Friendly GUI:** Simple, intuitive interface built using Tkinter for ease of use.
 
