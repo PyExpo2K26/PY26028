@@ -1,0 +1,19 @@
+#Virtual env
+venv/
+.venv/
+
+#Python
+__pycache__/
+*.pyc
+
+#Pyinstaller
+
+build/
+dist/
+*.spec
+
+#Output
+output/
+
+
+
