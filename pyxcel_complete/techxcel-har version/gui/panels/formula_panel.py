@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QPushButton, QLineEdit, QPlainTextEdit,
     QFrame, QScrollArea, QApplication
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 
 
@@ -126,7 +126,7 @@ class FormulaPanel(QWidget):
         root.setSpacing(0)
 
         # Left side — scrollable formula content (stretch 3)
-        root.addWidget(self._build_left_panel(), stretch=3)
+        root.addWidget(self._build_left_formula_panel(), stretch=3)
 
         # Vertical divider
         div = QFrame()

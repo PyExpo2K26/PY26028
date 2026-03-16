@@ -5,9 +5,9 @@ import os
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QFrame, QScrollArea, QComboBox,
-    QGridLayout, QSizePolicy
+    QGridLayout, QSizePolicy, QLineEdit
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 
 TREND_ICON  = {"up": "↑", "down": "↓", "neutral": "→"}
@@ -266,6 +266,18 @@ class KpiPanel(QWidget):
 
         scroll.setWidget(inner)
         return scroll
+
+    def _build_empty_state(self):
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setAlignment(Qt.AlignCenter)
+        layout.setSpacing(12)
+        icon = QLabel("📈"); icon.setAlignment(Qt.AlignCenter); icon.setStyleSheet("font-size:52px;")
+        msg  = QLabel("No KPIs generated yet"); msg.setAlignment(Qt.AlignCenter); msg.setStyleSheet("color:#555;font-size:15px;")
+        hint = QLabel("Load an Excel file and click 'Generate KPI Cards'\nLLaMA will automatically identify relevant business metrics")
+        hint.setAlignment(Qt.AlignCenter); hint.setWordWrap(True); hint.setStyleSheet("color:#3a3d5e;font-size:12px;")
+        layout.addWidget(icon); layout.addWidget(msg); layout.addWidget(hint)
+        return widget
 
     # ── RIGHT: embedded chat panel ────────────────────────────
     def _build_right_chat(self):
