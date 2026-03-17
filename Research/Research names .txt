@@ -1,0 +1,4 @@
+References
+    1. Panko, R. R. (2015). What We Know About Spreadsheet Errors. Journal of End User Computing.
+    2. McKinney, W. (2018). Python for Data Analysis. O’Reilly Media.
+    3. Russell, S., & Norvig, P. (2020). Artificial Intelligence: A Modern Approach. Pearson.
