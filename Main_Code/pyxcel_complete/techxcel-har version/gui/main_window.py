@@ -3,12 +3,13 @@ PyXcel — Main Window
 Sidebar navigation + panel switcher.
 """
 import os
+from pathlib import Path
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
     QLabel, QPushButton, QStackedWidget, QFrame,
-    QStatusBar, QFileDialog
+    QStatusBar, QFileDialog, QApplication
 )
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QSettings
 from PySide6.QtGui import QFont
 
 
@@ -19,7 +20,10 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(1200, 750)
         self.resize(1400, 860)
         self.current_file = None
+        self.theme = "dark"
+        self.settings = QSettings("KiTE Development Team", "PyXcel")
         self._build_ui()
+        self._load_saved_theme()
         self._check_ollama_status()
 
     # ── Build UI ────────────────────────────────────────────
@@ -73,8 +77,9 @@ class MainWindow(QMainWindow):
 
         # Ollama status
         self.ollama_indicator = QLabel("⬤  Checking Ollama...")
+        self.ollama_indicator.setObjectName("ollama_indicator")
         self.ollama_indicator.setContentsMargins(16, 8, 16, 8)
-        self.ollama_indicator.setStyleSheet("color:#555;font-size:11px;")
+        self.ollama_indicator.setProperty("status", "checking")
         layout.addWidget(self.ollama_indicator)
         layout.addWidget(self._divider())
 
@@ -103,8 +108,8 @@ class MainWindow(QMainWindow):
         for section_name, items in nav_items:
             # Section label
             sec = QLabel(section_name)
+            sec.setObjectName("section_label")
             sec.setContentsMargins(16, 12, 16, 4)
-            sec.setStyleSheet("color:#444;font-size:10px;letter-spacing:1px;")
             layout.addWidget(sec)
 
             for label, index in items:
@@ -123,31 +128,25 @@ class MainWindow(QMainWindow):
 
         # File info
         self.file_label = QLabel("No file loaded")
+        self.file_label.setObjectName("file_label")
         self.file_label.setContentsMargins(16, 10, 16, 4)
         self.file_label.setWordWrap(True)
-        self.file_label.setStyleSheet("color:#444;font-size:10px;")
         layout.addWidget(self.file_label)
 
         # Load file button
         load_btn = QPushButton("📂  Load Excel File")
+        load_btn.setObjectName("btn_secondary")
         load_btn.setCursor(Qt.PointingHandCursor)
-        load_btn.setStyleSheet("""
-            QPushButton {
-                margin: 8px;
-                background-color: #1e2035;
-                color: #7c83ff;
-                border: 1px solid #2a2d3e;
-                border-radius: 8px;
-                padding: 9px;
-                font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #252840;
-                border-color: #7c83ff;
-            }
-        """)
+        load_btn.setProperty("compact", "true")
         load_btn.clicked.connect(self.load_file)
         layout.addWidget(load_btn)
+
+        self.theme_btn = QPushButton("🌙  Dark Theme")
+        self.theme_btn.setObjectName("theme_toggle")
+        self.theme_btn.setProperty("compact", "true")
+        self.theme_btn.setCursor(Qt.PointingHandCursor)
+        self.theme_btn.clicked.connect(self.toggle_theme)
+        layout.addWidget(self.theme_btn)
 
         spacer = QWidget(); spacer.setFixedHeight(10)
         layout.addWidget(spacer)
@@ -249,19 +248,13 @@ class MainWindow(QMainWindow):
             if is_ollama_running():
                 if is_model_available():
                     self.ollama_indicator.setText("⬤  LLaMA Ready")
-                    self.ollama_indicator.setStyleSheet(
-                        "color:#4caf81;font-size:11px;padding:0 16px;"
-                    )
+                    self._set_ollama_status("online")
                 else:
                     self.ollama_indicator.setText("⬤  Model Not Pulled")
-                    self.ollama_indicator.setStyleSheet(
-                        "color:#ff9800;font-size:11px;padding:0 16px;"
-                    )
+                    self._set_ollama_status("warning")
             else:
                 self.ollama_indicator.setText("⬤  Ollama Offline")
-                self.ollama_indicator.setStyleSheet(
-                    "color:#f44336;font-size:11px;padding:0 16px;"
-                )
+                self._set_ollama_status("offline")
 
         QTimer.singleShot(500, check)
         self.status_timer = QTimer()
@@ -272,10 +265,40 @@ class MainWindow(QMainWindow):
     def _divider(self):
         line = QFrame()
         line.setFrameShape(QFrame.HLine)
-        line.setStyleSheet(
-            "background-color:#2a2d3e;max-height:1px;border:none;"
-        )
+        line.setObjectName("divider")
         return line
 
     def set_status(self, message: str):
         self.status_bar.showMessage(message)
+
+    def _set_ollama_status(self, status: str):
+        self.ollama_indicator.setProperty("status", status)
+        self.ollama_indicator.style().unpolish(self.ollama_indicator)
+        self.ollama_indicator.style().polish(self.ollama_indicator)
+
+    def _load_saved_theme(self):
+        saved = self.settings.value("ui/theme", "dark")
+        self.apply_theme(saved if saved in {"dark", "light"} else "dark")
+
+    def toggle_theme(self):
+        self.apply_theme("light" if self.theme == "dark" else "dark")
+
+    def apply_theme(self, theme_name: str):
+        theme_files = {
+            "dark": "styles.qss",
+            "light": "styles_light.qss",
+        }
+        qss_name = theme_files.get(theme_name, "styles.qss")
+        qss_path = Path(__file__).resolve().parent / qss_name
+
+        if qss_path.exists():
+            app = QApplication.instance()
+            if app is not None:
+                with qss_path.open("r", encoding="utf-8") as f:
+                    app.setStyleSheet(f.read())
+
+            self.theme = theme_name
+            self.settings.setValue("ui/theme", theme_name)
+            self.theme_btn.setText(
+                "🌙  Switch to Dark" if theme_name == "light" else "☀️  Switch to Light"
+            )
