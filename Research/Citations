@@ -1,0 +1,29 @@
+@article{panko1998we,
+  title={What we know about spreadsheet errors},
+  author={Panko, Raymond R},
+  journal={Journal of Organizational and End User Computing (JOEUC)},
+  volume={10},
+  number={2},
+  pages={15--21},
+  year={1998},
+  publisher={IGI Global Scientific Publishing}
+}
+
+
+@article{mckinney2012python,
+  title={Python for Data Analysis. OReilly Media},
+  author={McKinney, Wes},
+  journal={Inc.: Sebastopol, CA, USA},
+  year={2012}
+}
+
+
+@article{rusell2010artificial,
+  title={Artificial intelligence: A modern approach},
+  author={Rusell, Stuart and Norvig, Peter},
+  year={2010},
+  publisher={Prentice Hall New Jeresy}
+}
+
+
+
