@@ -180,7 +180,6 @@ class HomePanel(QWidget):
         title.setFont(font)
 
         subtitle = QLabel(
-            "Replace macros with natural language  ·  "
             "Generate formulas  ·  Clean data  ·  Chat with your spreadsheet"
         )
         subtitle.setStyleSheet("color:#555;font-size:12px;letter-spacing:0.2px;")
@@ -417,11 +416,10 @@ class HomePanel(QWidget):
         layout.setSpacing(10)
 
         actions = [
-            ("⚙️", "Macro\nReplacement", 2),
-            ("🧮", "Formula\nGenerator",  3),
-            ("🧹", "Data\nCleaner",       4),
-            ("💬", "Chat\nwith Data",     5),
-            ("📈", "KPI\nCards",          6),
+            ("🧮", "Formula\nGenerator",  2),
+            ("🧹", "Data\nCleaner",       3),
+            ("💬", "Chat\nwith Data",     4),
+            ("📈", "KPI\nCards",          5),
         ]
 
         for icon, title, panel_index in actions:

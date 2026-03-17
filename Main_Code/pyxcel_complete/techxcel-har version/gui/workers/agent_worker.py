@@ -16,37 +16,6 @@ class BaseWorker(QThread):
         raise NotImplementedError
 
 
-class MacroWorker(BaseWorker):
-    def __init__(self, filepath: str, instruction: str, parent=None):
-        super().__init__(parent)
-        self.filepath    = filepath
-        self.instruction = instruction
-
-    def run(self):
-        try:
-            from core.ollama_client      import ask_llama
-            from core.workbook_inspector import get_context_string
-            from core.code_executor      import execute_macro_code
-
-            self.status.emit("Inspecting workbook structure...")
-            ctx = get_context_string(self.filepath)
-            self.status.emit("Generating code with LLaMA...")
-            system = (
-                "You are a Python/openpyxl expert. "
-                "Respond ONLY with Python code — no markdown, no explanation, no backticks. "
-                "Available variables: wb (openpyxl workbook), filepath (str). "
-                "Imports available: openpyxl, PatternFill, Font, Alignment, "
-                "Border, Side, get_column_letter, pd (pandas). "
-                "Always end with wb.save(filepath)."
-            )
-            code = ask_llama(system, f"{ctx}\n\nUser instruction: {self.instruction}")
-            self.status.emit("Executing generated code...")
-            result = execute_macro_code(self.filepath, code)
-            self.result.emit(result)
-        except Exception as e:
-            self.error.emit(str(e))
-
-
 class FormulaWorker(BaseWorker):
     def __init__(self, description: str, context: str = "", parent=None):
         super().__init__(parent)

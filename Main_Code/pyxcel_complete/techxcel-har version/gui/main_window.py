@@ -90,17 +90,16 @@ class MainWindow(QMainWindow):
                 ("📊  Spreadsheet View",   1),
             ]),
             ("AI FEATURES", [
-                ("⚙️   Macro Replacement",  2),
-                ("🧮  Formula Generator",  3),
-                ("🧹  Data Cleaner",        4),
-                ("💬  Chat with Data",      5),
-                ("📈  KPI Cards",           6),
+                ("🧮  Formula Generator",  2),
+                ("🧹  Data Cleaner",        3),
+                ("💬  Chat with Data",      4),
+                ("📈  KPI Cards",           5),
             ]),
             ("TOOLS", [
-                ("🔢  Pivot Tables",        7),
-                ("📉  Chart Creator",       8),
-                ("📄  PDF Export",          9),
-                ("🔀  File Merger",         10),
+                ("🔢  Pivot Tables",        6),
+                ("📉  Chart Creator",       7),
+                ("📄  PDF Export",          8),
+                ("🔀  File Merger",         9),
             ]),
         ]
 
@@ -157,7 +156,6 @@ class MainWindow(QMainWindow):
     def _load_panels(self):
         from gui.panels.home_panel        import HomePanel
         from gui.panels.spreadsheet_panel import SpreadsheetPanel
-        from gui.panels.macro_panel       import MacroPanel
         from gui.panels.formula_panel     import FormulaPanel
         from gui.panels.cleaner_panel     import CleanerPanel
         from gui.panels.chat_panel        import ChatPanel
@@ -169,7 +167,6 @@ class MainWindow(QMainWindow):
 
         self.home_panel        = HomePanel(self)
         self.spreadsheet_panel = SpreadsheetPanel(self)
-        self.macro_panel       = MacroPanel(self)
         self.formula_panel     = FormulaPanel(self)
         self.cleaner_panel     = CleanerPanel(self)
         self.chat_panel        = ChatPanel(self)
@@ -182,15 +179,14 @@ class MainWindow(QMainWindow):
         for panel in [
             self.home_panel,        # 0
             self.spreadsheet_panel, # 1
-            self.macro_panel,       # 2
-            self.formula_panel,     # 3
-            self.cleaner_panel,     # 4
-            self.chat_panel,        # 5
-            self.kpi_panel,         # 6
-            self.pivot_panel,       # 7
-            self.chart_panel,       # 8
-            self.pdf_panel,         # 9
-            self.merger_panel,      # 10
+            self.formula_panel,     # 2
+            self.cleaner_panel,     # 3
+            self.chat_panel,        # 4
+            self.kpi_panel,         # 5
+            self.pivot_panel,       # 6
+            self.chart_panel,       # 7
+            self.pdf_panel,         # 8
+            self.merger_panel,      # 9
         ]:
             self.stack.addWidget(panel)
 
@@ -223,7 +219,6 @@ class MainWindow(QMainWindow):
     def _notify_panels_file_loaded(self, path: str):
         panels = [
             self.spreadsheet_panel,
-            self.macro_panel,
             self.formula_panel,
             self.cleaner_panel,
             self.chat_panel,

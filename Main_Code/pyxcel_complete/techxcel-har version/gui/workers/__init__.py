@@ -1,5 +1,5 @@
 from gui.workers.agent_worker import (
-    MacroWorker, FormulaWorker, CleanerWorker,
+    FormulaWorker, CleanerWorker,
     ChatWorker, KpiWorker, InspectorWorker,
     PivotWorker, ChartWorker, ChartPreviewWorker,
     PdfWorker, MergerWorker,

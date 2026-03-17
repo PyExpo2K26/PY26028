@@ -13,23 +13,6 @@ def clean_code(raw: str) -> str:
     return re.sub(r"```python|```", "", raw).strip()
 
 
-def execute_macro_code(filepath: str, code: str) -> dict:
-    code  = clean_code(code)
-    scope = {
-        "wb": openpyxl.load_workbook(filepath), "filepath": filepath,
-        "openpyxl": openpyxl, "pd": pd,
-        "PatternFill": PatternFill, "Font": Font,
-        "Alignment": Alignment, "Border": Border, "Side": Side,
-        "get_column_letter": get_column_letter,
-        "dataframe_to_rows": dataframe_to_rows,
-    }
-    try:
-        exec(code, scope)
-        return {"status": "success", "code": code, "message": "Operation completed successfully."}
-    except Exception as e:
-        return {"status": "error", "code": code, "message": str(e)}
-
-
 def execute_cleaning_code(filepath: str, sheet: str, code: str) -> dict:
     code       = clean_code(code)
     df         = pd.read_excel(filepath, sheet_name=sheet)
