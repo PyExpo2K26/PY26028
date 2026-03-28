@@ -126,7 +126,7 @@ class CleanerPanel(QWidget):
         root.addWidget(self._build_left_panel(), stretch=1)
 
         # Right side — collapsible chat button
-        self.chat_toggle_btn = QPushButton("💬")
+        self.chat_toggle_btn = QPushButton("")
         self.chat_toggle_btn.setFixedSize(50, 50)
         self.chat_toggle_btn.setCursor(Qt.PointingHandCursor)
         self.chat_toggle_btn.clicked.connect(self._toggle_chat)
@@ -232,7 +232,7 @@ class CleanerPanel(QWidget):
         layout.setSpacing(12)
 
         # Header
-        chat_title = QLabel("💬  Chat with Data")
+        chat_title = QLabel("Chat with Data")
         font = QFont(); font.setPointSize(14); font.setBold(True)
         chat_title.setFont(font)
 
@@ -363,7 +363,7 @@ class CleanerPanel(QWidget):
         self.clear_btn.clicked.connect(self._clear)
         self.clear_btn.setStyleSheet("QPushButton{background-color:#1e2035;color:#7c83ff;border:1px solid #2a2d3e;border-radius:8px;padding:9px;font-size:12px;}QPushButton:hover{background-color:#252840;}")
 
-        self.run_btn = QPushButton("🧹  Clean Data")
+        self.run_btn = QPushButton("Clean Data")
         self.run_btn.setFixedWidth(150)
         self.run_btn.setCursor(Qt.PointingHandCursor)
         self.run_btn.clicked.connect(self._run_cleaner)
@@ -447,17 +447,17 @@ class CleanerPanel(QWidget):
 
     def _run_cleaner(self):
         if not self.current_file:
-            self.result_box.setPlainText("❌  No file loaded.\nPlease load an Excel file first.")
+            self.result_box.setPlainText("No file loaded.\nPlease load an Excel file first.")
             return
         instructions = self.instruction_input.toPlainText().strip()
         if not instructions:
-            self.result_box.setPlainText("❌  Please enter cleaning instructions first.")
+            self.result_box.setPlainText("Please enter cleaning instructions first.")
             return
         sheet = self.sheet_combo.currentText().strip() or "Sheet1"
         self.run_btn.setEnabled(False)
         self.run_btn.setText("⏳  Processing...")
         self.status_label.setText("Running...")
-        self.result_box.setPlainText("🔄  Sending to LLaMA...\n")
+        self.result_box.setPlainText("Sending to LLaMA...\n")
         self._update_stat(self.time_label, "Status", "Processing...", "#ff9800")
 
         from gui.workers.agent_worker import CleanerWorker
@@ -484,14 +484,14 @@ class CleanerPanel(QWidget):
             self._update_stat(self.diff_label,   "Removed", f"{diff} rows", "#f44336" if isinstance(diff,int) and diff>0 else "#4caf81")
             self._update_stat(self.time_label,   "Status",  "Done ✓", "#4caf81")
             self.status_label.setText("Done ✓")
-            self.result_box.setPlainText(f"✅  Data cleaned successfully!\n\nBefore: {before[0]} rows × {before[1]} cols\nAfter:  {after[0]} rows × {after[1]} cols\nRemoved: {diff} rows\n\n── Generated Code ──\n{data.get('code','')}")
+            self.result_box.setPlainText(f"Data cleaned successfully!\n\nBefore: {before[0]} rows × {before[1]} cols\nAfter:  {after[0]} rows × {after[1]} cols\nRemoved: {diff} rows\n\n── Generated Code ──\n{data.get('code','')}")
             self.main_window.set_status(f"Data cleaned: {before[0]} → {after[0]} rows ✓")
             if hasattr(self.main_window, "spreadsheet_panel"):
                 self.main_window.spreadsheet_panel._reload()
         else:
             self._update_stat(self.time_label, "Status", "Failed ✗", "#f44336")
             self.status_label.setText("Error ✗")
-            self.result_box.setPlainText(f"❌  Cleaning failed.\n\nError: {data.get('message','Unknown error')}\n\n── Generated Code ──\n{data.get('code','')}")
+            self.result_box.setPlainText(f"Cleaning failed.\n\nError: {data.get('message','Unknown error')}\n\n── Generated Code ──\n{data.get('code','')}")
 
     def _on_error(self, msg):
         self.run_btn.setEnabled(True)

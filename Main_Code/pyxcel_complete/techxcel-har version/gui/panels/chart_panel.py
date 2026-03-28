@@ -184,7 +184,7 @@ class ChartPanel(QWidget):
         layout.addWidget(self._divider())
 
         # ── File Status ──
-        self.file_status = QLabel("⚠️  No file loaded")
+        self.file_status = QLabel("  No file loaded")
         self.file_status.setStyleSheet("color:#ff9800;font-size:12px;background:#1e1a0e;border-radius:6px;padding:8px 12px;")
         layout.addWidget(self.file_status)
 
@@ -208,7 +208,7 @@ class ChartPanel(QWidget):
         layout.setSpacing(12)
 
         # Header
-        chat_title = QLabel("💬  Chat with Data")
+        chat_title = QLabel(" Chat with Data")
         font = QFont(); font.setPointSize(14); font.setBold(True)
         chat_title.setFont(font)
 
@@ -234,7 +234,7 @@ class ChartPanel(QWidget):
         layout.addWidget(chat_sub)
 
         # File status bar
-        self.chat_file_status = QLabel("⚠️  Load a file to start chatting")
+        self.chat_file_status = QLabel("  Load a file to start chatting")
         self.chat_file_status.setStyleSheet(
             "color:#ff9800;font-size:11px;background:#1e1a0e;"
             "border-radius:6px;padding:6px 10px;"
@@ -388,7 +388,7 @@ class ChartPanel(QWidget):
             QPushButton:disabled { color: #333; border-color: #1e2035; }
         """)
 
-        self.save_btn = QPushButton("💾  Save to Excel")
+        self.save_btn = QPushButton("  Save to Excel")
         self.save_btn.setFixedHeight(38)
         self.save_btn.setCursor(Qt.PointingHandCursor)
         self.save_btn.clicked.connect(self._save_chart)
@@ -455,7 +455,7 @@ class ChartPanel(QWidget):
         empty.setStyleSheet("background:transparent;")
         empty_layout = QVBoxLayout(empty)
         empty_layout.setAlignment(Qt.AlignCenter)
-        empty_icon  = QLabel("📊")
+        empty_icon  = QLabel("File is not uploaded")
         empty_icon.setAlignment(Qt.AlignCenter)
         empty_icon.setStyleSheet("font-size:48px;background:transparent;")
         empty_msg   = QLabel("Chart preview will appear here")
@@ -492,7 +492,7 @@ class ChartPanel(QWidget):
             return
 
         self.preview_btn.setEnabled(False)
-        self.preview_btn.setText("⏳  Loading...")
+        self.preview_btn.setText("  Loading...")
         self.ctrl_status.setText("Generating preview...")
         self.preview_status.setText("Rendering chart...")
 
@@ -542,7 +542,7 @@ class ChartPanel(QWidget):
         title      = self.title_input.text().strip()
 
         self.save_btn.setEnabled(False)
-        self.save_btn.setText("⏳  Saving...")
+        self.save_btn.setText("  Saving...")
         self.ctrl_status.setText("Embedding chart in Excel...")
 
         from gui.workers.agent_worker import ChartWorker
@@ -559,7 +559,7 @@ class ChartPanel(QWidget):
 
     def _on_save_result(self, data):
         self.save_btn.setEnabled(True)
-        self.save_btn.setText("💾  Save to Excel")
+        self.save_btn.setText("  Save to Excel")
         if data["status"] == "success":
             self.ctrl_status.setText("Chart saved ✓")
             self.main_window.set_status(
@@ -608,7 +608,7 @@ class ChartPanel(QWidget):
         self.preview_btn.setEnabled(True)
         self.preview_btn.setText("👁  Preview")
         self.save_btn.setEnabled(True)
-        self.save_btn.setText("💾  Save to Excel")
+        self.save_btn.setText("  Save to Excel")
         self.ctrl_status.setText(f"Error ✗")
         self.preview_status.setText(f"❌  {msg[:60]}")
         self.main_window.set_status(f"Error: {msg}")
@@ -680,7 +680,7 @@ class ChartPanel(QWidget):
                 "border-radius:6px;padding:6px 10px;"
             )
         else:
-            self.chat_file_status.setText("⚠️  Load a file to start chatting")
+            self.chat_file_status.setText("  Load a file to start chatting")
             self.chat_file_status.setStyleSheet(
                 "color:#ff9800;font-size:11px;background:#1e1a0e;"
                 "border-radius:6px;padding:6px 10px;"
@@ -728,10 +728,10 @@ class ChartPanel(QWidget):
     def _toggle_chat(self):
         if self.chat_panel.isVisible():
             self.chat_panel.hide()
-            self.chat_toggle_btn.setText("💬")
+            self.chat_toggle_btn.setText("")
         else:
             self.chat_panel.show()
-            self.chat_toggle_btn.setText("❌")
+            self.chat_toggle_btn.setText("")
             self.chat_input.setFocus()
 
     # ── Helpers ──────────────────────────────────────────────

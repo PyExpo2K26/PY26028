@@ -119,7 +119,7 @@ class ChatPanel(QWidget):
         left.addWidget(title)
         left.addWidget(subtitle)
 
-        self.clear_chat_btn = QPushButton("🗑  Clear Chat")
+        self.clear_chat_btn = QPushButton("Clear Chat")
         self.clear_chat_btn.setFixedWidth(120)
         self.clear_chat_btn.setCursor(Qt.PointingHandCursor)
         self.clear_chat_btn.clicked.connect(self._clear_chat)
@@ -259,7 +259,7 @@ class ChatPanel(QWidget):
             self.history_label.setText(f"{len(self.history)} messages  ·  context: {exchanges} exchanges")
             self.main_window.set_status("Response received ✓")
         else:
-            self._add_system_message("❌  Error getting response from LLaMA.")
+            self._add_system_message("Error getting response from LLaMA.")
 
     def _on_error(self, msg):
         self.typing_indicator.stop()
@@ -267,7 +267,7 @@ class ChatPanel(QWidget):
         self.send_btn.setEnabled(True)
         self.msg_input.setEnabled(True)
         self.send_btn.setText("Send  ➤")
-        self._add_system_message(f"❌  Error: {msg}\n\nMake sure Ollama is running: ollama serve")
+        self._add_system_message(f"Error: {msg}\n\nMake sure Ollama is running: ollama serve")
         self.main_window.set_status(f"Error: {msg}")
 
     def _add_bubble(self, text, is_user):
@@ -312,7 +312,7 @@ class ChatPanel(QWidget):
     def on_file_loaded(self, path):
         self.current_file = path
         filename = os.path.basename(path)
-        self.file_status.setText(f"✅  Chatting about: {filename}")
+        self.file_status.setText(f"Chatting about: {filename}")
         self.file_status.setStyleSheet("color:#4caf81;font-size:12px;background:#0e1e14;border-radius:6px;padding:8px 12px;")
         self._clear_chat()
-        self._add_system_message(f"📄  {filename} loaded — Ask me anything about your data!")
+        self._add_system_message(f"{filename} loaded — Ask me anything about your data!")

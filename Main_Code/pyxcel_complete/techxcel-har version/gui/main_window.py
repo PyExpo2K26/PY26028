@@ -1,16 +1,16 @@
 """
 PyXcel — Main Window
-Sidebar navigation + panel switcher.
+Sidebar navigation + panel switcher + hamburger toggle with fade.
 """
 import os
 from pathlib import Path
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
-    QLabel, QPushButton, QStackedWidget, QFrame,
-    QStatusBar, QFileDialog, QApplication
+    QLabel, QPushButton, QStackedWidget, QFrame, QScrollArea,
+    QStatusBar, QFileDialog, QApplication, QGraphicsOpacityEffect
 )
-from PySide6.QtCore import Qt, QTimer, QSettings
-from PySide6.QtGui import QFont
+from PySide6.QtCore import Qt, QTimer, QSettings, QPropertyAnimation, QEasingCurve
+from PySide6.QtGui import QFont, QIcon, QPixmap
 
 
 class MainWindow(QMainWindow):
@@ -21,8 +21,17 @@ class MainWindow(QMainWindow):
         self.resize(1400, 860)
         self.current_file = None
         self.theme = "dark"
+        self.sidebar_visible = True
         self.settings = QSettings("KiTE Development Team", "PyXcel")
+
+        # ── Logo path ───────────────────────────────────────
+        self.logo_path = str(Path(__file__).resolve().parent / "assets" / "logo.png")
+
+        # ── Window Title Bar Icon ───────────────────────────
+        self.setWindowIcon(QIcon(self.logo_path))
+
         self._build_ui()
+        self._setup_sidebar_animation()
         self._load_saved_theme()
         self._check_ollama_status()
 
@@ -37,9 +46,20 @@ class MainWindow(QMainWindow):
         self.sidebar = self._build_sidebar()
         root_layout.addWidget(self.sidebar)
 
+        # ── Right side: topbar + content stack ─────────────
+        right_widget = QWidget()
+        right_layout = QVBoxLayout(right_widget)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.setSpacing(0)
+
+        topbar = self._build_topbar()
+        right_layout.addWidget(topbar)
+
         self.stack = QStackedWidget()
         self.stack.setObjectName("content_area")
-        root_layout.addWidget(self.stack)
+        right_layout.addWidget(self.stack)
+
+        root_layout.addWidget(right_widget)
 
         self._load_panels()
 
@@ -47,30 +67,176 @@ class MainWindow(QMainWindow):
         self.status_bar.showMessage("Ready  |  No file loaded")
         self.setStatusBar(self.status_bar)
 
+    # ── Topbar ───────────────────────────────────────────────
+    def _build_topbar(self):
+        topbar = QWidget()
+        topbar.setObjectName("topbar")
+        topbar.setFixedHeight(48)
+        topbar.setStyleSheet("""
+            #topbar {
+                background-color: #1a1a2e;
+                border-bottom: 1px solid #2a2a3e;
+            }
+        """)
+
+        layout = QHBoxLayout(topbar)
+        layout.setContentsMargins(10, 0, 16, 0)
+        layout.setSpacing(8)
+
+        # ── Hamburger button ────────────────────────────────
+        self.hamburger_btn = QPushButton("☰")
+        self.hamburger_btn.setFixedSize(36, 36)
+        self.hamburger_btn.setCursor(Qt.PointingHandCursor)
+        self.hamburger_btn.setToolTip("Toggle Sidebar")
+        self.hamburger_btn.setStyleSheet("""
+            QPushButton {
+                background: transparent;
+                color: #cccccc;
+                font-size: 20px;
+                border: none;
+                border-radius: 6px;
+            }
+            QPushButton:hover {
+                background-color: #2a2a4a;
+                color: white;
+            }
+            QPushButton:pressed {
+                background-color: #3a3a5a;
+            }
+        """)
+        self.hamburger_btn.clicked.connect(self.toggle_sidebar)
+        layout.addWidget(self.hamburger_btn)
+
+        # ── Quick action buttons (shown when sidebar is hidden) ──
+        self.quick_actions = QWidget()
+        qa_layout = QHBoxLayout(self.quick_actions)
+        qa_layout.setContentsMargins(4, 0, 0, 0)
+        qa_layout.setSpacing(5)
+
+        quick_items = [
+            (" Home",        0),
+            (" Spreadsheet", 1),
+            (" Formula",     2),
+            (" Cleaner",     3),
+            (" Chat",        4),
+            (" KPI",         5),
+            (" Pivot",       6),
+            (" Charts",      7),
+            (" PDF",         8),
+            (" Merger",      9),
+        ]
+
+        for label, index in quick_items:
+            btn = QPushButton(label)
+            btn.setCursor(Qt.PointingHandCursor)
+            btn.setStyleSheet("""
+                QPushButton {
+                    background: #2a2a4a;
+                    color: #cccccc;
+                    font-size: 11px;
+                    border: none;
+                    border-radius: 5px;
+                    padding: 4px 10px;
+                }
+                QPushButton:hover {
+                    background-color: #3a3a6a;
+                    color: white;
+                }
+                QPushButton:pressed {
+                    background-color: #4a4a8a;
+                }
+            """)
+            btn.clicked.connect(lambda checked, i=index: self.switch_panel(i))
+            qa_layout.addWidget(btn)
+
+        # Hidden by default (sidebar is visible on launch)
+        self.quick_actions.setVisible(False)
+        layout.addWidget(self.quick_actions)
+        layout.addStretch()
+
+        return topbar
+
+    # ── Sidebar Fade Animation ───────────────────────────────
+    def _setup_sidebar_animation(self):
+        self.sidebar_effect = QGraphicsOpacityEffect(self.sidebar)
+        self.sidebar.setGraphicsEffect(self.sidebar_effect)
+        self.sidebar_effect.setOpacity(1.0)
+
+        self.fade_anim = QPropertyAnimation(self.sidebar_effect, b"opacity")
+        self.fade_anim.setDuration(250)
+        self.fade_anim.setEasingCurve(QEasingCurve.InOutCubic)
+        self.fade_anim.finished.connect(self._on_fade_finished)
+
+    def toggle_sidebar(self):
+        if self.sidebar_visible:
+            # Fade OUT
+            self.fade_anim.setStartValue(1.0)
+            self.fade_anim.setEndValue(0.0)
+            self.fade_anim.start()
+        else:
+            # Show sidebar then fade IN
+            self.sidebar.setVisible(True)
+            self.quick_actions.setVisible(False)
+            self.fade_anim.setStartValue(0.0)
+            self.fade_anim.setEndValue(1.0)
+            self.fade_anim.start()
+
+        self.sidebar_visible = not self.sidebar_visible
+
+    def _on_fade_finished(self):
+        if not self.sidebar_visible:
+            # Sidebar faded out — collapse it and show quick actions
+            self.sidebar.setVisible(False)
+            self.quick_actions.setVisible(True)
+            self.hamburger_btn.setText("☰")
+        else:
+            # Sidebar faded in
+            self.hamburger_btn.setText("✕")
+
     # ── Sidebar ─────────────────────────────────────────────
     def _build_sidebar(self):
-        sidebar = QWidget()
-        sidebar.setObjectName("sidebar")
-        sidebar.setFixedWidth(230)
+        content = QWidget()
+        content.setObjectName("sidebar_content")
+        content.setFixedWidth(230)
 
-        layout = QVBoxLayout(sidebar)
+        layout = QVBoxLayout(content)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # App title
+        # ── App title with logo icon ────────────────────────
         title_widget = QWidget()
         title_layout = QVBoxLayout(title_widget)
         title_layout.setContentsMargins(16, 20, 16, 16)
 
+        title_row = QWidget()
+        title_row_layout = QHBoxLayout(title_row)
+        title_row_layout.setContentsMargins(0, 0, 0, 0)
+        title_row_layout.setSpacing(8)
+
+        logo_label = QLabel()
+        pixmap = QPixmap(self.logo_path)
+        if not pixmap.isNull():
+            pixmap = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            logo_label.setPixmap(pixmap)
+        else:
+            logo_label.setText("🟦")
+            logo_label.setStyleSheet("font-size: 24px;")
+
         title = QLabel("PyXcel")
         title.setObjectName("app_title")
-        font = QFont(); font.setPointSize(18); font.setBold(True)
+        font = QFont()
+        font.setPointSize(18)
+        font.setBold(True)
         title.setFont(font)
+
+        title_row_layout.addWidget(logo_label)
+        title_row_layout.addWidget(title)
+        title_row_layout.addStretch()
 
         subtitle = QLabel("AI Spreadsheet System")
         subtitle.setObjectName("app_subtitle")
 
-        title_layout.addWidget(title)
+        title_layout.addWidget(title_row)
         title_layout.addWidget(subtitle)
         layout.addWidget(title_widget)
         layout.addWidget(self._divider())
@@ -86,26 +252,25 @@ class MainWindow(QMainWindow):
         # ── Nav sections ──
         nav_items = [
             ("WORKSPACE", [
-                ("🏠  Home",               0),
-                ("📊  Spreadsheet View",   1),
+                ("  Home",               0),
+                ("  Spreadsheet View",   1),
             ]),
             ("AI FEATURES", [
-                ("🧮  Formula Generator",  2),
-                ("🧹  Data Cleaner",        3),
-                ("💬  Chat with Data",      4),
-                ("📈  KPI Cards",           5),
+                ("  Formula Generator",  2),
+                ("  Data Cleaner",        3),
+                ("  Chat with Data",      4),
+                ("  KPI Cards",           5),
             ]),
             ("TOOLS", [
-                ("🔢  Pivot Tables",        6),
-                ("📉  Chart Creator",       7),
-                ("📄  PDF Export",          8),
-                ("🔀  File Merger",         9),
+                ("  Pivot Tables",        6),
+                ("  Chart Creator",       7),
+                ("  PDF Export",          8),
+                ("  File Merger",         9),
             ]),
         ]
 
         self.nav_buttons = []
         for section_name, items in nav_items:
-            # Section label
             sec = QLabel(section_name)
             sec.setObjectName("section_label")
             sec.setContentsMargins(16, 12, 16, 4)
@@ -132,8 +297,7 @@ class MainWindow(QMainWindow):
         self.file_label.setWordWrap(True)
         layout.addWidget(self.file_label)
 
-        # Load file button
-        load_btn = QPushButton("📂  Load Excel File")
+        load_btn = QPushButton("  Load Excel File")
         load_btn.setObjectName("btn_secondary")
         load_btn.setCursor(Qt.PointingHandCursor)
         load_btn.setProperty("compact", "true")
@@ -147,10 +311,20 @@ class MainWindow(QMainWindow):
         self.theme_btn.clicked.connect(self.toggle_theme)
         layout.addWidget(self.theme_btn)
 
-        spacer = QWidget(); spacer.setFixedHeight(10)
+        spacer = QWidget()
+        spacer.setFixedHeight(10)
         layout.addWidget(spacer)
 
-        return sidebar
+        scroll = QScrollArea()
+        scroll.setObjectName("sidebar")
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll.setFixedWidth(230)
+        scroll.setWidget(content)
+
+        return scroll
 
     # ── Load Panels ─────────────────────────────────────────
     def _load_panels(self):
@@ -211,7 +385,7 @@ class MainWindow(QMainWindow):
 
         self.current_file = path
         filename = os.path.basename(path)
-        self.file_label.setText(f"📄 {filename}")
+        self.file_label.setText(f" {filename}")
         self.status_bar.showMessage(f"Loaded: {filename}")
         self._notify_panels_file_loaded(path)
         self.switch_panel(1)
@@ -295,5 +469,5 @@ class MainWindow(QMainWindow):
             self.theme = theme_name
             self.settings.setValue("ui/theme", theme_name)
             self.theme_btn.setText(
-                "🌙  Switch to Dark" if theme_name == "light" else "☀️  Switch to Light"
+                "  Switch to Dark" if theme_name == "light" else "  Switch to Light"
             )

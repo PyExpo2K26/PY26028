@@ -126,7 +126,7 @@ class HomePanel(QWidget):
         root.addWidget(self._build_left_panel(), stretch=1)
 
         # Right side — collapsible chat container
-        self.chat_toggle_btn = QPushButton("💬")
+        self.chat_toggle_btn = QPushButton("")
         self.chat_toggle_btn.setFixedSize(50, 50)
         self.chat_toggle_btn.setCursor(Qt.PointingHandCursor)
         self.chat_toggle_btn.clicked.connect(self._toggle_chat)
